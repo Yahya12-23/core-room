@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>Coming Soon</h1>
+            <p>Something amazing is on the way. Be the first to know!</p>
+            
+            <form id="notificationForm" class="form">
+                <input 
+                    type="email" 
+                    id="email" 
+                    placeholder="your@email.com" 
+                    required
+                >
+                <input 
+                    type="text" 
+                    id="name" 
+                    placeholder="Your Name" 
+                    required
+                >
+                <input 
+                    type="tel" 
+                    id="phone" 
+                    placeholder="Your Phone Number (optional)"
+                >
+                <button type="submit" class="btn">Notify Me</button>
+            </form>
+
+            <p id="message" class="message"></p>
+        </div>
+    </div>
+
+    <script src="./assets/script.js"></script>
+</body>
+</html>
