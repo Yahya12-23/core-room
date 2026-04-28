@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "the-core-room-static-site/api/*.js": {
+      "runtime": "@vercel/node"
+    }
+  }
+}
