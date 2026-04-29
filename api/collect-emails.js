@@ -1,4 +1,5 @@
 module.exports = async function handler(req, res) {
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -6,10 +7,10 @@ module.exports = async function handler(req, res) {
   try {
     let { name, email, phone } = req.body;
 
-    // normalize
-    name = name?.trim();
-    email = email?.trim();
-    phone = phone?.replace(/\D/g, "");
+    // normalize inputs
+    name = (name || "").trim();
+    email = (email || "").trim();
+    phone = (phone || "").replace(/\D/g, "");
 
     // validation
     if (!name) {
@@ -26,15 +27,47 @@ module.exports = async function handler(req, res) {
 
     const SHEET_URL = "https://api.sheetbest.com/sheets/f0f8d202-f7ab-4431-ade0-79cac7d1fe0f";
 
-    // fetch existing rows
-    let existing = [];
-    try {
-      const existingRes = await fetch(SHEET_URL);
-      existing = await existingRes.json();
-    } catch (e) {
-      console.log("Fetch existing failed:", e);
-      existing = [];
+    // GET existing rows
+    const existingRes = await fetch(SHEET_URL);
+    const existing = await existingRes.json();
+
+    // check duplicates
+    const duplicate = existing.some(row =>
+      row.Email === email || row.Phone === phone
+    );
+
+    if (duplicate) {
+      return res.status(200).json({
+        message: "You're already on the list."
+      });
     }
+
+    // POST new row
+    const insertRes = await fetch(SHEET_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        Email: email,
+        Name: name,
+        Phone: phone
+      })
+    });
+
+    if (!insertRes.ok) {
+      return res.status(500).json({ error: "Sheet insert failed" });
+    }
+
+    return res.status(200).json({
+      message: "You're on the list."
+    });
+
+  } catch (err) {
+    console.log("SERVER ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+};    }
 
     // duplicate check
     const duplicate = existing.some(
