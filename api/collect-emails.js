@@ -1,37 +1,69 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
-
-  const { name, email, phone } = req.body;
 
   try {
-    const response = await fetch(
-      'https://api.sheetbest.com/sheets/f0f8d202-f7ab-4431-ade0-79cac7d1fe0f',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify([
-          {
-            Email: email,
-            Name: name,
-            Phone: phone
-          }
-        ])
-      }
-    );
+    let { name, email, phone } = req.body;
 
-    const text = await response.text();
+    // clean inputs
+    name = name?.trim();
+    email = email?.trim();
+    phone = phone?.replace(/\D/g, "");
 
-    if (!response.ok) {
-      console.error("Sheet error:", text);
-      return res.status(500).json({ error: "Sheet error", details: text });
+    // 🔒 VALIDATION
+    if (!name) {
+      return res.status(400).json({ error: "Name required" });
     }
 
-    return res.status(200).json({ success: true });
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ error: "Invalid email" });
+    }
+
+    if (!phone || phone.length !== 10) {
+      return res.status(400).json({ error: "Invalid phone number" });
+    }
+
+    const SHEET_URL = "https://api.sheetbest.com/sheets/f0f8d202-f7ab-4431-ade0-79cac7d1fe0f";
+
+    // 🔍 CHECK DUPLICATES
+    const existingRes = await fetch(SHEET_URL);
+    const existing = await existingRes.json();
+
+    const duplicate = existing.some(
+      (row) => row.Email === email || row.Phone === phone
+    );
+
+    if (duplicate) {
+      return res.status(200).json({
+        message: "You're already on the list.",
+      });
+    }
+
+    // ✅ INSERT
+    const insertRes = await fetch(SHEET_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        Email: email,
+        Name: name,
+        Phone: phone,
+      }),
+    });
+
+    if (!insertRes.ok) {
+      throw new Error("Failed to insert");
+    }
+
+    return res.status(200).json({
+      message: "You're on the list.",
+    });
 
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Server error' });
+    return res.status(500).json({
+      error: "Server error",
+    });
   }
-}
+}}
