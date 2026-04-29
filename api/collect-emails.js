@@ -7,15 +7,17 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      'https://api.sheetbest.com/v1/collect/f0f8d202-f7ab-4431-ade0-79cac7d1fe0f',
+      'https://api.sheetbest.com/v1/sheets/f0f8d202-f7ab-4431-ade0-79cac7d1fe0f',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          Email: email,
-          Name: name,
-          Phone: phone
-        })
+        body: JSON.stringify([
+          {
+            Email: email,
+            Name: name,
+            Phone: phone
+          }
+        ])
       }
     );
 
@@ -31,7 +33,4 @@ export default async function handler(req, res) {
     console.error(err);
     return res.status(500).json({ error: 'Server error' });
   }
-}    return res.status(500).json({ error: 'Server error' });
-  }
-}  }
-}
+}}
