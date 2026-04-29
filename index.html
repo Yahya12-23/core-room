@@ -91,13 +91,39 @@ document.getElementById('emailForm').addEventListener('submit', async (e) => {
 
   const form = e.target;
 
-  const payload = {
-    name: form.name.value,
-    email: form.email.value,
-    phone: form.phone.value
-  };
+  const name = form.name.value.trim();
+  const email = form.email.value.trim();
+  let phone = form.phone.value.trim();
 
   const status = document.getElementById('status');
+  status.textContent = '';
+
+  // 🔒 VALIDATION
+
+  if (!name) {
+    status.textContent = 'Enter your name.';
+    return;
+  }
+
+  if (!email || !email.includes('@')) {
+    status.textContent = 'Enter a valid email.';
+    return;
+  }
+
+  // remove everything except digits
+  phone = phone.replace(/\D/g, '');
+
+  if (phone.length !== 10) {
+    status.textContent = 'Enter a valid 10-digit phone number.';
+    return;
+  }
+
+  const payload = {
+    name,
+    email,
+    phone
+  };
+
   status.textContent = 'Submitting...';
 
   try {
@@ -110,7 +136,7 @@ document.getElementById('emailForm').addEventListener('submit', async (e) => {
     const data = await res.json();
 
     if (res.ok) {
-      status.textContent = 'You’re on the list.';
+      status.textContent = data.message || 'You’re on the list.';
       form.reset();
     } else {
       status.textContent = data.error || 'Something went wrong.';
